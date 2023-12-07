@@ -7,7 +7,14 @@ import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -28,7 +35,8 @@ import javax.swing.JTextArea;
  *
  * 4) List all the words in alphabetical order
  * 
- * 5) Write the count for each word, e.g. "word word pippo" should output "pippo -> 1 word -> 2"
+ * 5) Write the count for each word, e.g. "word word pippo" should output "pippo
+ * -> 1 word -> 2"
  *
  */
 public final class LambdaFilter extends JFrame {
@@ -43,7 +51,33 @@ public final class LambdaFilter extends JFrame {
         TO_LOWERCASE("Convert to lowercase", String::toLowerCase),
         COUNT_CHAR("Count the number of chars", e -> Integer.toString(e.length())),
         COUNT_LINES("Count the number of lines", e -> Long.toString(e.chars().filter(c -> c == '\n').count())),
-        ALPHABETICAL_ORDER("All the words in alphabetical order", e -> );
+        ALPHABETICAL_ORDER("All the words in alphabetical order", Command::alphaOrder),
+        COUNT_WORD("the count for each word", Command::countWord);
+
+        private static String alphaOrder(final String string) {
+            StringTokenizer st = new StringTokenizer(string);
+            Set<String> set = new HashSet<>();
+            while (st.hasMoreTokens()) {
+                set.add(st.nextToken());
+            }
+            return set.stream()
+                    .sorted((a, b) -> a.compareTo(b))
+                    .reduce((s1, s2) -> s1 + "\n" + s2)
+                    .get();
+        }
+
+        private static String countWord(final String string) {
+            StringTokenizer st = new StringTokenizer(string);
+            Map<String, Integer> map = new HashMap<>();
+            while (st.hasMoreTokens()) {
+                String temp = st.nextToken();
+                map.put(temp, map.containsKey(temp) ? map.get(temp) + 1 : 1);
+            }
+            return map.entrySet().stream()
+                    .map(e -> e.getKey() + " -> " + e.getValue() + "\n")
+                    .reduce((a, b) -> a + b)
+                    .get();
+        }
 
         private final String commandName;
         private final Function<String, String> fun;
