@@ -70,7 +70,6 @@ public final class ConcurrentGUI extends JFrame {
          */
         private volatile boolean stop;
         private volatile boolean up = true;
-        private volatile boolean down = false;
         private int counter;
 
         @Override
@@ -80,8 +79,7 @@ public final class ConcurrentGUI extends JFrame {
                     // The EDT doesn't access `counter` anymore, it doesn't need to be volatile 
                     final var nextText = Integer.toString(this.counter);
                     SwingUtilities.invokeAndWait(() -> ConcurrentGUI.this.display.setText(nextText));
-                    this.counter = (this.up) ? this.counter + 1 : this.counter + 0;
-                    this.counter = (this.down) ? this.counter - 1 : this.counter + 0;
+                    this.counter = (this.up) ? this.counter + 1 : this.counter - 1;
                     Thread.sleep(100);
                 } catch (InvocationTargetException | InterruptedException ex) {
                     /*
@@ -104,13 +102,11 @@ public final class ConcurrentGUI extends JFrame {
         }
 
         public void upCounting() {
-            this.down = false;
             this.up = true;
         }
-
+        
         public void downCounting() {
             this.up = false;
-            this.down = true;
         }
     }
 }
